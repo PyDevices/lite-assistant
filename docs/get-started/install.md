@@ -3,7 +3,7 @@
 lite-assistant needs Python 3.10 or later. It installs from a clone:
 
 ```bash
-git clone https://github.com/bdbarnett/lite-assistant
+git clone https://github.com/PyDevices/lite-assistant
 cd lite-assistant
 pip install -e .
 lite-assistant setup

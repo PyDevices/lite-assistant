@@ -5,7 +5,7 @@ lite-assistant is a local, OpenAI-compatible voice and chat server for your own 
 ## Install
 
 ```bash
-git clone https://github.com/bdbarnett/lite-assistant
+git clone https://github.com/PyDevices/lite-assistant
 cd lite-assistant
 pip install -e .
 lite-assistant setup     # downloads the models, about 8.5 GB

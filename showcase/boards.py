@@ -50,7 +50,7 @@ def main(names) -> None:
             s.still(name)
             s.wait(hold)
             s.note(f"{name} took {s.now() - started:.0f} s")
-        s.card("lite-assistant", "github.com/bdbarnett/lite-assistant", 5.0)
+        s.card("lite-assistant", "github.com/PyDevices/lite-assistant", 5.0)
     assemble("boards")
 
 

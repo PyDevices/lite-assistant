@@ -91,7 +91,7 @@ def tools(engines) -> list:
 def fetch(url: str, **query) -> Any:
     """ JSON from a web API. """
     request = urllib.request.Request(url + "?" + urllib.parse.urlencode(query),
-                                     headers={"User-Agent": "lite-assistant (github.com/bdbarnett/lite-assistant)"})
+                                     headers={"User-Agent": "lite-assistant (github.com/PyDevices/lite-assistant)"})
     try:
         with urllib.request.urlopen(request, timeout=10) as response:
             return json.load(response)

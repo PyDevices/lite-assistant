@@ -142,7 +142,7 @@ def search(s: Stage) -> None:
 
 
 def outro(s: Stage) -> None:
-    s.card("lite-assistant", "github.com/bdbarnett/lite-assistant", 5.0)
+    s.card("lite-assistant", "github.com/PyDevices/lite-assistant", 5.0)
 
 
 SCENES = [intro, clock, seeing, dog_distance, editing, reading, plant, documents, sounds, voice, web,

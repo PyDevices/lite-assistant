@@ -40,6 +40,11 @@ dependencies = [
     "pypdf",
 ]
 
+[project.urls]
+Homepage = "https://github.com/PyDevices/lite-assistant"
+Documentation = "https://github.com/PyDevices/lite-assistant/blob/main/docs/index.md"
+Issues = "https://github.com/PyDevices/lite-assistant/issues"
+
 [dependency-groups]
 test = ["pytest", "httpx", "openai"]
 
