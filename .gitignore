@@ -1,0 +1,16 @@
+# Rebuilt by run.sh / run.cmd
+.venv/
+# Package builds
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+# Output from trying the API
+*.raw
+*.swp
+.pytest_cache/
+# Images and audio for trying the server by hand
+test-media/
+# Showcase videos and stills, made by showcase/*.py
+showcase/output/

@@ -1,0 +1,32 @@
+# lite-assistant
+
+> A local, OpenAI-compatible voice and chat server. Point any OpenAI client at `http://<host>:5000/v1`. Speech, transcription, vision and the rest run on the server's own machine; the chat model is Gemma through LiteRT-LM, unless the server was started with `--llm none`.
+
+`GET /v1` lists every endpoint this server has, and `GET /v1/models` lists the engines it loaded, each with its `kind` (`llm`, `tts`, `stt` and more). `/openapi.json` has each request's schema, and `/docs` shows them as a page.
+
+## Keys
+
+- A request from the server's own machine needs no key.
+- From anywhere else, send a user's key as `Authorization: Bearer <key>`. The server's owner makes one with `lite-assistant users add <name>`; a board is a user too.
+- Only private addresses get in: the local network and Tailscale. Public addresses are refused unless the server runs with `--allow-public`.
+
+## Speaking and listening
+
+- `POST /v1/audio/speech`: text to speech. JSON `{"model": "kokoro", "voice": "<id>", "input": "<text>"}`. The reply streams as raw 16-bit 24 kHz mono PCM, whatever `response_format` asks for.
+- `GET /voices`: the voices, each with its `id`, `name` and `engine`.
+- `POST /v1/audio/transcriptions`: speech to text, multipart with `file` (a WAV). `model=whisper` is slower and more accurate than the default, Moonshine, and hears about 100 languages.
+- `POST /v1/voice`: a whole spoken turn. Audio in, the spoken reply out as 24 kHz PCM. Needs the chat model.
+- `WS /v1/realtime`: OpenAI's Realtime API. 24 kHz 16-bit mono PCM in and out, with turn detection. Needs the chat model.
+
+## Chat
+
+- `POST /v1/chat/completions` and `POST /v1/responses`: OpenAI's chat APIs, streamed or not, with images, audio, files and function tools.
+- With `--llm none`, no chat model is loaded and these answer with an error that says so. Speech, transcription and everything else still work.
+
+## Seeing and hearing more
+
+Beyond OpenAI's API: `/v1/detect` (objects and faces), `/v1/depth`, `/v1/segment`, `/v1/ocr`, `/v1/lines`, `/v1/video/actions`, `/v1/images/classifications`, `/v1/images/edits`, `/v1/images/quality`, `/v1/audio/classifications` (sounds), `/v1/audio/pitch`, `/v1/audio/denoise`, `/v1/audio/diarization`, `/v1/audio/speakers`, `/v1/classify`, `/v1/embeddings` and `/v1/rerank`. Some engines load on first use, which adds a few seconds to that request.
+
+## From a microcontroller
+
+The repository's `examples/board_client.py` makes every kind of request with nothing but sockets, so it runs on MicroPython as well as CPython: JSON, a photo or recording as the body, multipart uploads, the key header, speech streamed back as PCM and played on the board's speaker, chat streamed or not, a whole spoken turn through `/v1/voice`, and the Realtime API's WebSocket. `docs/how-it-works/board-results.md` has what an ESP32-P4 board got from each endpoint. `examples/tts_client.py` is a smaller one for speech alone.

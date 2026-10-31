@@ -1,0 +1,22 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get update && sudo apt-get install -y libsndfile1
+      - run: pip install -e . pytest httpx openai
+      # These files use fake engines and need no models. The engine tests load
+      # real models, so they run on a machine that has them.
+      - run: >
+          pytest -q tests/test_app.py tests/test_users.py tests/test_files.py
+          tests/test_litert_models.py tests/test_helpers.py tests/test_web.py

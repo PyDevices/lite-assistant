@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Board endpoints</title>
+<!-- The board video's page: each scene sends a test photo or clip to one of the server's endpoints, as a board
+     would, and shows the request, the reply and what it means. The showcase serves it beside the server, so
+     its requests go to the server as any page's would. -->
+<style>
+    :root { --bg: #111113; --panel: #1b1b1e; --border: #2c2c31; --text: #ececec; --muted: #9a9aa2;
+            --accent: #38bdf8; --green: #4ade80; --yellow: #facc15; --orange: #fb923c; --pink: #f472b6; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+                 font: 15px/1.45 system-ui, sans-serif; overflow: hidden; }
+    header { display: flex; align-items: baseline; gap: 14px; padding: 18px 28px 6px; }
+    header .endpoint { font: 600 15px ui-monospace, monospace; color: var(--accent); background: #0c2a3a;
+                       padding: 3px 10px; border-radius: 6px; }
+    header h1 { font-size: 22px; margin: 0; font-weight: 600; }
+    #caption { padding: 0 28px; color: var(--muted); min-height: 22px; }
+    main { display: grid; grid-template-columns: 1fr 470px; gap: 20px; padding: 14px 28px 0; height: 600px; }
+    #visual { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;
+              background: var(--panel); border: 1px solid var(--border); border-radius: 12px; }
+    #code { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+    .block { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px;
+             min-height: 0; overflow: hidden; position: relative; }
+    .block h2 { margin: 0 0 6px; font: 600 12px system-ui; letter-spacing: .06em; text-transform: uppercase;
+                color: var(--muted); display: flex; justify-content: space-between; }
+    .block h2 .took { text-transform: none; letter-spacing: 0; color: var(--green); }
+    #reply { flex: 1; }
+    #reply::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40px;
+                    background: linear-gradient(transparent, var(--panel)); }
+    pre { margin: 0; font: 12.5px/1.5 ui-monospace, "DejaVu Sans Mono", monospace; white-space: pre-wrap;
+          word-break: break-word; }
+    .k { color: #93c5fd; } .s { color: #86efac; } .n { color: #fdba74; } .l { color: #c4b5fd; } .m { color: var(--muted); }
+    .waiting { color: var(--muted); }
+    .frame { position: relative; line-height: 0; }
+    .frame img, .frame canvas { max-width: 100%; max-height: 100%; display: block; border-radius: 6px; }
+    .frame svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    .pair { display: flex; width: 100%; box-sizing: border-box; gap: 16px; align-items: center; justify-content: center; padding: 16px; }
+    .pair .frame { flex: 1; }
+    .tag { font: 600 13px system-ui; fill: #0b0b0d; }
+    .bars { width: 100%; padding: 26px 34px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; }
+    .bar { display: grid; grid-template-columns: 250px 1fr 64px; align-items: center; gap: 12px; font-size: 16px; }
+    .bar .track { height: 18px; background: #26262b; border-radius: 9px; overflow: hidden; }
+    .bar .fill { height: 100%; background: var(--accent); border-radius: 9px; transition: width .35s; width: 0; }
+    .bar .value { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+    .bar.first .fill { background: var(--green); }
+    .rows { width: 100%; padding: 24px 30px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; }
+    .row { display: flex; justify-content: space-between; gap: 16px; padding: 12px 16px; border-radius: 10px;
+           background: #232328; font-size: 17px; transition: transform .6s, background .6s; }
+    .row .label { color: var(--accent); font-weight: 600; white-space: nowrap; }
+    .row.best { background: #12331f; }
+    .row .score { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .big { font: 700 64px system-ui; text-align: center; }
+    .note { color: var(--muted); text-align: center; font-size: 17px; }
+    .thumbs { display: flex; width: 100%; box-sizing: border-box; gap: 18px; padding: 20px; }
+    .thumb { flex: 1; min-width: 0; text-align: center; font-size: 15px; line-height: 1.5; }
+    .thumb img { width: 100%; box-sizing: border-box; border-radius: 8px; border: 3px solid transparent; display: block; margin-bottom: 8px; }
+    .thumb span { white-space: pre-line; }
+    .thumb.best img { border-color: var(--green); }
+    .wave { width: 100%; padding: 22px 30px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px; }
+    .wave .title { font-size: 15px; color: var(--muted); margin-bottom: 4px; }
+    .wave canvas { width: 100%; height: 150px; display: block; background: #151518; border-radius: 8px; }
+    .turns { position: relative; height: 54px; background: #151518; border-radius: 8px; margin-top: 8px; }
+    .turn { position: absolute; top: 8px; bottom: 8px; border-radius: 6px; font: 600 13px/38px system-ui;
+            color: #0b0b0d; padding-left: 8px; overflow: hidden; white-space: nowrap; }
+    .playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; left: 0; }
+</style>
+</head>
+<body>
+<header><span class="endpoint" id="endpoint"></span><h1 id="title"></h1></header>
+<div id="caption"></div>
+<main>
+    <div id="visual"></div>
+    <div id="code">
+        <div class="block" id="request"><h2>Request</h2><pre id="requesttext"></pre></div>
+        <div class="block" id="reply"><h2>Reply <span class="took" id="took"></span></h2><pre id="replytext"></pre></div>
+    </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const SVG = "http://www.w3.org/2000/svg";
+const COLORS = ["#38bdf8", "#4ade80", "#facc15", "#f472b6", "#fb923c", "#a78bfa", "#2dd4bf", "#f87171"];
+// The joints a skeleton joins
+const BONES = [["left_shoulder", "left_elbow"], ["left_elbow", "left_wrist"], ["right_shoulder", "right_elbow"],
+               ["right_elbow", "right_wrist"], ["left_shoulder", "right_shoulder"], ["left_shoulder", "left_hip"],
+               ["right_shoulder", "right_hip"], ["left_hip", "right_hip"], ["left_hip", "left_knee"], ["left_knee", "left_ankle"],
+               ["right_hip", "right_knee"], ["right_knee", "right_ankle"], ["nose", "left_eye"], ["nose", "right_eye"],
+               ["left_eye", "left_ear"], ["right_eye", "right_ear"]];
+let audio = null, playing = 0;
+// Long waits for a reply with nothing else happening, in ms since the epoch, which the video cuts short
+const waits = [];
+
+function scene(endpoint, title, caption, request) {
+    $("endpoint").textContent = endpoint;
+    $("title").textContent = title;
+    $("caption").textContent = caption;
+    $("requesttext").textContent = request;
+    $("replytext").innerHTML = '<span class="waiting">Waiting for the reply…</span>';
+    $("took").textContent = "";
+    $("visual").innerHTML = "";
+}
+
+/** A test file, from the showcase's media. */
+async function media(path) {
+    const response = await fetch("/showcase-media/" + path);
+    if (!response.ok) throw new Error(`No ${path} in test-media`);
+    return response.blob();
+}
+
+/** Sends a request as a board would, timing it; returns the JSON, or the blob for a file reply. */
+async function send(url, body, headers = {}, show = true) {
+    const started = performance.now(), wall = Date.now();
+    const response = await fetch(url, { method: "POST", body, headers });
+    const took = performance.now() - started;
+    if (took > 2000 && !playing) waits.push([wall, Date.now()]);
+    if (!response.ok) throw new Error(`${url}: ${response.status} ${await response.text()}`);
+    const json = (response.headers.get("content-type") || "").includes("json");
+    const result = json ? await response.json() : await response.blob();
+    if (show) {
+        $("took").textContent = took < 1000 ? `${Math.round(took)} ms` : `${(took / 1000).toFixed(1)} s`;
+        if (json) $("replytext").innerHTML = pretty(result);
+    }
+    return result;
+}
+
+function form(fields) {
+    const data = new FormData();
+    for (const [name, value] of fields) data.append(name, value, ...(value instanceof Blob ? [name] : []));
+    return data;
+}
+
+// --- The reply, shortened to fit: long lists keep their first few items, numbers three decimals ---------
+
+const MORE = Symbol("more");
+function brief(value, keep = 3) {
+    if (Array.isArray(value)) {
+        // A short list of numbers, such as a box, is shown whole
+        const cut = value.length > keep && !(value.length <= 4 && value.every(v => typeof v === "number"));
+        const shown = value.slice(0, cut ? keep : undefined).map(v => brief(v, keep));
+        return cut ? [...shown, MORE] : shown;
+    }
+    if (value && typeof value === "object") {
+        // A long table, such as a person's 17 joints, keeps its first few entries too
+        const entries = Object.entries(value);
+        const table = entries.length > 8 && entries.every(([, v]) => v && typeof v === "object");
+        const shown = Object.fromEntries(entries.slice(0, table ? keep : undefined).map(([k, v]) => [k, brief(v, keep)]));
+        if (table) shown["…"] = MORE;
+        return shown;
+    }
+    if (typeof value === "number") return Math.round(value * 1000) / 1000;
+    if (typeof value === "string" && value.length > 70) return value.slice(0, 67) + "…";
+    return value;
+}
+function format(value, indent = "", lead = 0) {
+    if (value === MORE) return '<span class="m">…</span>';
+    if (value === null) return '<span class="l">null</span>';
+    if (typeof value === "string") return `<span class="s">${escape(JSON.stringify(value))}</span>`;
+    if (typeof value === "number") return `<span class="n">${value}</span>`;
+    if (typeof value === "boolean") return `<span class="l">${value}</span>`;
+    const array = Array.isArray(value);
+    const entries = array ? value.map(v => ["", v]) : Object.entries(value);
+    const inner = entries.map(([k, v]) => v === MORE ? format(v) : (array ? "" : `<span class="k">"${escape(k)}"</span>: `) + format(v, indent + "  ", array ? 0 : k.length + 4));
+    const flat = inner.join(", ");
+    const [open, close] = array ? ["[", "]"] : ["{", "}"];
+    // On one line if it fits the panel, about 58 characters, with the key before it
+    if (flat.replace(/<[^>]+>/g, "").length + indent.length + lead < 56) return open + flat + close;
+    return open + "\n" + inner.map(i => indent + "  " + i).join(",\n") + "\n" + indent + close;
+}
+function escape(text) {
+    return text.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+}
+/** A reply as lines that, too long for the panel, wrap under themselves rather than at the left edge. */
+function pretty(json, keep = 3) {
+    return format(brief(json, keep)).split("\n").map(line => {
+        const spaces = line.length - line.trimStart().length;
+        return `<div style="padding-left:${spaces + 2}ch;text-indent:-2ch">${line.trimStart()}</div>`;
+    }).join("");
+}
+
+// --- Drawing ---------------------------------------------------------------------------------------------
+
+/** A photo filling the visual, with an SVG over it whose coordinates are fractions of the photo. */
+async function photo(blob, parent = $("visual")) {
+    const frame = document.createElement("div");
+    frame.className = "frame";
+    const img = new Image();
+    img.src = URL.createObjectURL(blob);
+    await img.decode();
+    const box = parent.getBoundingClientRect();
+    const scale = Math.min((box.width - 40) / img.naturalWidth, (box.height - 40) / img.naturalHeight);
+    img.style.width = `${img.naturalWidth * scale}px`;
+    img.style.maxWidth = "none";
+    img.style.maxHeight = "none";
+    const svg = document.createElementNS(SVG, "svg");
+    svg.setAttribute("viewBox", `0 0 ${img.naturalWidth * scale} ${img.naturalHeight * scale}`);
+    frame.append(img, svg);
+    parent.append(frame);
+    return { frame, svg, w: img.naturalWidth * scale, h: img.naturalHeight * scale };
+}
+
+function shape(svg, name, attributes, text) {
+    const el = document.createElementNS(SVG, name);
+    for (const [k, v] of Object.entries(attributes)) el.setAttribute(k, v);
+    if (text !== undefined) el.textContent = text;
+    svg.append(el);
+    return el;
+}
+
+/** A box, its edges fractions of the photo, with a label above it. */
+function box(p, [left, top, right, bottom], label, color) {
+    shape(p.svg, "rect", { x: left * p.w, y: top * p.h, width: (right - left) * p.w, height: (bottom - top) * p.h,
+                           fill: "none", stroke: color, "stroke-width": 3, rx: 4 });
+    if (!label) return;
+    const width = label.length * 7.6 + 12, y = Math.max(top * p.h - 24, 0);
+    shape(p.svg, "rect", { x: left * p.w, y, width, height: 22, fill: color, rx: 4 });
+    shape(p.svg, "text", { x: left * p.w + 6, y: y + 16, class: "tag" }, label);
+}
+
+const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+/** Plays audio through the page's speakers, so the recording hears it; resolves when it ends. */
+async function play(blob, onTime) {
+    audio = audio || new AudioContext();
+    const buffer = await audio.decodeAudioData(await blob.arrayBuffer());
+    const source = audio.createBufferSource();
+    source.buffer = buffer;
+    source.connect(audio.destination);
+    const start = audio.currentTime;
+    playing++;
+    source.start();
+    let ticking = true;
+    if (onTime) (function tick() {
+        if (!ticking) return;
+        onTime(Math.min((audio.currentTime - start) / buffer.duration, 1), buffer.duration);
+        requestAnimationFrame(tick);
+    })();
+    await new Promise(resolve => { source.onended = resolve; });
+    playing--;
+    ticking = false;
+    onTime?.(1, buffer.duration);
+}
+
+async function waveform(blob, canvas, color) {
+    audio = audio || new AudioContext();
+    const buffer = await audio.decodeAudioData(await blob.arrayBuffer());
+    const samples = buffer.getChannelData(0);
+    canvas.width = canvas.clientWidth * devicePixelRatio;
+    canvas.height = canvas.clientHeight * devicePixelRatio;
+    const g = canvas.getContext("2d"), step = Math.ceil(samples.length / canvas.width), mid = canvas.height / 2;
+    g.fillStyle = color;
+    for (let x = 0; x < canvas.width; x++) {
+        let peak = 0;
+        for (let i = x * step; i < (x + 1) * step && i < samples.length; i++) peak = Math.max(peak, Math.abs(samples[i]));
+        g.fillRect(x, mid - peak * mid * 0.95, 1, Math.max(peak * mid * 1.9, 1));
+    }
+    return buffer.duration;
+}
+
+function bars(items, parent = $("visual")) {
+    const list = document.createElement("div");
+    list.className = "bars";
+    parent.append(list);
+    const rows = items.map(([label, score], i) => {
+        const row = document.createElement("div");
+        row.className = "bar" + (i === 0 ? " first" : "");
+        row.innerHTML = `<span></span><div class="track"><div class="fill"></div></div><span class="value"></span>`;
+        list.append(row);
+        return row;
+    });
+    const update = next => next.forEach(([label, score], i) => {
+        if (!rows[i]) return;
+        rows[i].children[0].textContent = label;
+        rows[i].querySelector(".fill").style.width = `${Math.round(score * 100)}%`;
+        rows[i].children[2].textContent = `${Math.round(score * 100)}%`;
+    });
+    requestAnimationFrame(() => update(items));
+    return update;
+}
+
+// --- The scenes ------------------------------------------------------------------------------------------
+
+const scenes = {
+    async detect() {
+        scene("POST /v1/detect", "Objects, and how far away each is",
+              "YOLOX finds the objects; MoGe-2's depth map says how far each one is from the camera.",
+              'curl --data-binary @room.jpg \\\n  -H "Content-Type: image/jpeg" \\\n  http://lite-assistant:5000/v1/detect');
+        const blob = await media("photos/000000000139.jpg");
+        const p = await photo(blob);
+        const found = await send("/v1/detect", blob, { "Content-Type": blob.type });
+        found.objects.forEach((o, i) => box(p, [o.box.left, o.box.top, o.box.right, o.box.bottom],
+                                            `${o.label}${o.distance != null ? " " + o.distance + " m" : ""}`, COLORS[i % COLORS.length]));
+    },
+
+    async pose() {
+        scene("POST /v1/detect?pose=true", "People's poses",
+              "RTMPose gives each person 17 joints, and says which hands are raised.",
+              'curl --data-binary @ballgame.jpg \\\n  -H "Content-Type: image/jpeg" \\\n  "http://lite-assistant:5000/v1/detect?pose=true&distances=false"');
+        const blob = await media("photos/000000002153.jpg");
+        const p = await photo(blob);
+        const found = await send("/v1/detect?pose=true&distances=false", blob, { "Content-Type": blob.type });
+        found.objects.filter(o => o.keypoints).forEach((o, i) => {
+            const color = COLORS[i % COLORS.length];
+            const points = o.keypoints;
+            for (const [a, b] of BONES) {
+                const [pa, pb] = [points[a], points[b]];
+                if (pa && pb && pa.score > 0.3 && pb.score > 0.3)
+                    shape(p.svg, "line", { x1: pa.x * p.w, y1: pa.y * p.h, x2: pb.x * p.w, y2: pb.y * p.h,
+                                           stroke: color, "stroke-width": 3, "stroke-linecap": "round" });
+            }
+            for (const point of Object.values(points).filter(k => k.score > 0.3))
+                shape(p.svg, "circle", { cx: point.x * p.w, cy: point.y * p.h, r: 3.5, fill: "#fff" });
+        });
+    },
+
+    async depth() {
+        scene("POST /v1/depth", "How far away everything is",
+              "MoGe-2 estimates the distance to every point in one photo, in meters; near is bright.",
+              'curl --data-binary @street.jpg \\\n  -H "Content-Type: image/jpeg" \\\n  "http://lite-assistant:5000/v1/depth?columns=4&rows=3"');
+        const blob = await media("photos/000000087038.jpg");
+        const pair = document.createElement("div");
+        pair.className = "pair";
+        $("visual").append(pair);
+        const left = document.createElement("div"), right = document.createElement("div");
+        left.style.cssText = right.style.cssText = "flex:1;height:520px;display:flex;align-items:center;justify-content:center";
+        pair.append(left, right);
+        const p = await photo(blob, left);
+        const found = await send("/v1/depth?columns=4&rows=3", blob, { "Content-Type": blob.type });
+        const map = await send("/v1/depth?response_format=png", blob, { "Content-Type": blob.type }, false);
+        const d = await photo(map, right);
+        // The grid's distances, over the depth map
+        found.grid.forEach((row, r) => row.forEach((distance, c) => {
+            if (distance == null) return;
+            // Each label as wide as its text, and inside the map
+            const width = `${distance} m`.length * 10 + 14;
+            const x = Math.min(Math.max((c + 0.5) / row.length * d.w, width / 2), d.w - width / 2);
+            const y = (r + 0.5) / found.grid.length * d.h;
+            shape(d.svg, "rect", { x: x - width / 2, y: y - 13, width, height: 24, rx: 5, fill: "rgba(0,0,0,.65)" });
+            shape(d.svg, "text", { x, y: y + 5, "text-anchor": "middle", fill: "#fff", "font-size": 14,
+                                   "font-weight": 600 }, `${distance} m`);
+        }));
+        shape(p.svg, "circle", { cx: found.nearest.x * p.w, cy: found.nearest.y * p.h, r: 9, fill: "none",
+                                 stroke: "#4ade80", "stroke-width": 3 });
+    },
+
+    async segment() {
+        scene("POST /v1/segment", "Finding things by name",
+              "CLIPSeg finds whatever the request names, and MoGe-2 says how far away it is.",
+              'curl -F file=@dog.jpg \\\n  -F "prompt=the dog, the grass, a car" \\\n  http://lite-assistant:5000/v1/segment');
+        const blob = await media("dog.png");
+        const p = await photo(blob);
+        const found = await send("/v1/segment", form([["file", blob], ["prompt", "the dog, the grass, a car"]]));
+        const mask = await send("/v1/segment", form([["file", blob], ["prompt", "the dog"], ["response_format", "png"]]), {}, false);
+        // The dog's mask, tinted, over the photo
+        const img = new Image();
+        img.src = URL.createObjectURL(mask);
+        await img.decode();
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const g = canvas.getContext("2d");
+        g.drawImage(img, 0, 0);
+        const pixels = g.getImageData(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < pixels.data.length; i += 4) {
+            const on = pixels.data[i] > 127;
+            pixels.data.set(on ? [56, 189, 248, 120] : [0, 0, 0, 0], i);
+        }
+        g.putImageData(pixels, 0, 0);
+        canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%";
+        p.frame.insertBefore(canvas, p.svg);
+        found.data.filter(f => f.found).forEach((f, i) => {
+            const [left, top, right, bottom] = f.box;
+            box(p, [left, top, right, bottom], `${f.prompt} ${f.distance} m`, COLORS[i]);
+        });
+    },
+
+    async lines() {
+        scene("POST /v1/lines", "The line a robot car follows",
+              "Where the tape is, how far off center the car is, and which way the line bends ahead.",
+              'curl --data-binary @floor.jpg \\\n  -H "Content-Type: image/jpeg" \\\n  http://lite-assistant:5000/v1/lines');
+        const blob = await media("lines/curve_left.jpg");
+        const p = await photo(blob);
+        const found = await send("/v1/lines", blob, { "Content-Type": blob.type });
+        const line = points => points.map(([x, y]) => `${x * p.w},${y * p.h}`).join(" ");
+        for (const each of found.lines || [])
+            shape(p.svg, "polyline", { points: line(each), fill: "none", stroke: "#facc15", "stroke-width": 4 });
+        if (found.path) {
+            shape(p.svg, "polyline", { points: line(found.path.points), fill: "none", stroke: "#4ade80", "stroke-width": 6,
+                                       "stroke-linecap": "round" });
+            shape(p.svg, "line", { x1: p.w / 2, y1: p.h - 4, x2: p.w / 2, y2: p.h - 60, stroke: "#fff", "stroke-width": 3,
+                                   "stroke-dasharray": "6 5" });
+        }
+    },
+
+    async actions() {
+        // A session of its own each run, which the request shown names
+        const session = "gym" + Date.now() % 100000;
+        scene(`POST /v1/video/actions?session=${session}`, "What people are doing",
+              "A board sends a photo at a time; MoViNet says what it makes of all of them so far.",
+              `for frame in frames/*.jpg; do\n  curl --data-binary @$frame \\\n    -H "Content-Type: image/jpeg" \\\n    "lite-assistant:5000/v1/video/actions?session=${session}"\ndone`);
+        const visual = $("visual");
+        visual.style.flexDirection = "column";
+        const holder = document.createElement("div");
+        holder.style.cssText = "height:330px;display:flex;align-items:center;justify-content:center;width:100%";
+        visual.append(holder);
+        const img = new Image();
+        img.style.cssText = "max-height:310px;border-radius:8px";
+        holder.append(img);
+        const update = bars([["", 0], ["", 0], ["", 0]], visual);
+        for (let i = 1; i <= 40; i++) {
+            const frame = await media(`video/jumping_jacks_frames/${String(i).padStart(3, "0")}.jpg`);
+            img.src = URL.createObjectURL(frame);
+            const started = performance.now();
+            const found = await send(`/v1/video/actions?session=${session}&top=3`, frame, { "Content-Type": frame.type });
+            update(found.actions.map(a => [a.label, a.score]));
+            // About 5 frames a second, the rate the model learned at
+            await pause(Math.max(200 - (performance.now() - started), 0));
+        }
+    },
+
+    async ocr() {
+        scene("POST /v1/ocr", "Reading text",
+              "PP-OCR reads each line of print, with where it is and how sure it is.",
+              'curl --data-binary @sign.jpg \\\n  -H "Content-Type: image/jpeg" \\\n  http://lite-assistant:5000/v1/ocr');
+        const blob = await media("sign.jpg");
+        const p = await photo(blob);
+        const found = await send("/v1/ocr", blob, { "Content-Type": blob.type });
+        found.lines.forEach((line, i) => box(p, line.box, "", COLORS[i % COLORS.length]));
+    },
+
+    async quality() {
+        scene("POST /v1/images/quality", "Keeping the best photo of a burst",
+              "NIMA scores each photo for sharpness, noise and exposure; best is the one to keep.",
+              'curl -F file=@1.jpg -F file=@2.jpg -F file=@3.jpg \\\n  http://lite-assistant:5000/v1/images/quality');
+        // One photo as a shaky hand, a steady one and a dim room take it
+        const files = ["showcase/burst_shaky.jpg", "showcase/burst_sharp.jpg", "showcase/burst_dark.jpg"];
+        const blobs = await Promise.all(files.map(media));
+        const thumbs = document.createElement("div");
+        thumbs.className = "thumbs";
+        $("visual").append(thumbs);
+        const cells = blobs.map(blob => {
+            const cell = document.createElement("div");
+            cell.className = "thumb";
+            cell.innerHTML = `<img src="${URL.createObjectURL(blob)}"><span>…</span>`;
+            thumbs.append(cell);
+            return cell;
+        });
+        const found = await send("/v1/images/quality", form(blobs.map(b => ["file", b])));
+        for (const score of found.data)
+            cells[score.index].querySelector("span").textContent = `technical ${score.technical}\naesthetic ${score.aesthetic}`;
+        cells[found.best].classList.add("best");
+    },
+
+    async classify() {
+        scene("POST /v1/classify", "Fast commands",
+              "GLiClass sorts a spoken command into the board's own intents in milliseconds, without the LLM.",
+              'curl http://lite-assistant:5000/v1/classify \\\n  -H "Content-Type: application/json" -d \'{\n  "input": ["Turn on the kitchen light", ...],\n  "labels": ["lights", "timer", "weather",\n             "music", "something else"]}\'');
+        const input = ["Turn on the kitchen light", "Set a timer for ten minutes", "Will it rain tomorrow?",
+                       "Play some jazz", "Who wrote Hamlet?"];
+        const rows = document.createElement("div");
+        rows.className = "rows";
+        $("visual").append(rows);
+        const cells = input.map(text => {
+            const row = document.createElement("div");
+            row.className = "row";
+            row.innerHTML = `<span>${escape(text)}</span><span><span class="label"></span> <span class="score"></span></span>`;
+            rows.append(row);
+            return row;
+        });
+        const found = await send("/v1/classify", JSON.stringify({ input, labels: ["lights", "timer", "weather", "music", "something else"] }),
+                                 { "Content-Type": "application/json" });
+        found.data.forEach(item => {
+            cells[item.index].querySelector(".label").textContent = item.label;
+            cells[item.index].querySelector(".score").textContent = item.score.toFixed(2);
+        });
+        $("replytext").innerHTML = pretty({ ...found, data: found.data.map(({ labels, ...rest }) => rest) }, 2);
+    },
+
+    async rerank() {
+        scene("POST /v1/rerank", "Which passage answers the question",
+              "Qwen3-Reranker puts a board's own passages in order of how well each answers a question.",
+              'curl http://lite-assistant:5000/v1/rerank \\\n  -H "Content-Type: application/json" -d \'{\n  "query": "How long is the warranty?",\n  "documents": ["Clean the filter...", ...]}\'');
+        const documents = ["Clean the dishwasher filter every month.", "Basil wilts quickly in direct sun.",
+                           "The warranty covers parts and labour for two years.", "Load cups and glasses on the top rack.",
+                           "Registering the product adds a third year of cover."];
+        const rows = document.createElement("div");
+        rows.className = "rows";
+        $("visual").append(rows);
+        const cells = documents.map(text => {
+            const row = document.createElement("div");
+            row.className = "row";
+            row.innerHTML = `<span>${escape(text)}</span><span class="score"></span>`;
+            rows.append(row);
+            return row;
+        });
+        const heading = document.createElement("div");
+        heading.className = "note";
+        heading.textContent = "“How long is the warranty?”";
+        rows.prepend(heading);
+        const found = await send("/v1/rerank", JSON.stringify({ query: "How long is the warranty?", documents, return_documents: false }),
+                                 { "Content-Type": "application/json" });
+        found.results.forEach(r => { cells[r.index].querySelector(".score").textContent = r.relevance_score.toFixed(3); });
+        await pause(900);
+        // Each passage slides to its place in the ranking
+        const height = cells[0].getBoundingClientRect().height + 10;
+        found.results.forEach((r, rank) => {
+            cells[r.index].style.transform = `translateY(${(rank - r.index) * height}px)`;
+            if (rank === 0) cells[r.index].classList.add("best");
+        });
+    },
+
+    async sounds() {
+        scene("POST /v1/audio/classifications", "What's that sound?",
+              "PANNs names the sounds in a recording from AudioSet's 527, in 10-second windows.",
+              'curl -F file=@kitchen.wav \\\n  http://lite-assistant:5000/v1/audio/classifications');
+        const blob = await media("sounds/mix.wav");
+        const wave = document.createElement("div");
+        wave.className = "wave";
+        wave.innerHTML = '<canvas></canvas>';
+        $("visual").append(wave);
+        await waveform(blob, wave.querySelector("canvas"), "#38bdf8");
+        const found = await send("/v1/audio/classifications", form([["file", blob]]));
+        bars(found.sounds.map(s => [s.label, s.score]), wave);
+        await play(blob);
+    },
+
+    async speakers() {
+        scene("POST /v1/audio/diarization", "Who spoke when",
+              "pyannote finds each voice in a recording and the turns each one takes.",
+              'curl -F file=@kitchen-talk.wav \\\n  http://lite-assistant:5000/v1/audio/diarization');
+        const blob = await media("audio/mm/talk.wav");
+        const wave = document.createElement("div");
+        wave.className = "wave";
+        wave.innerHTML = '<div><canvas></canvas><div class="turns"></div></div>';
+        $("visual").append(wave);
+        const duration = await waveform(blob, wave.querySelector("canvas"), "#a78bfa");
+        const found = await send("/v1/audio/diarization", form([["file", blob]]));
+        const turns = wave.querySelector(".turns"), speakers = [];
+        for (const turn of found.segments || found.turns || []) {
+            const who = turn.speaker;
+            if (!speakers.includes(who)) speakers.push(who);
+            const el = document.createElement("div");
+            el.className = "turn";
+            el.style.left = `${turn.start / duration * 100}%`;
+            el.style.width = `${(turn.end - turn.start) / duration * 100}%`;
+            el.style.background = COLORS[speakers.indexOf(who) % COLORS.length];
+            turns.append(el);
+            // A turn too short for its speaker's name shows just the number
+            el.textContent = who;
+            if (el.scrollWidth > el.clientWidth) el.textContent = who.replace(/^speaker /, "");
+        }
+        const head = document.createElement("div");
+        head.className = "playhead";
+        turns.append(head);
+        await play(blob, share => { head.style.left = `${share * 100}%`; });
+    },
+
+    async pitch() {
+        scene("POST /v1/audio/pitch", "Tuning a guitar",
+              "CREPE hears the note, the nearest string, and how many cents sharp or flat it is.",
+              'curl -F file=@string.wav -F instrument=guitar \\\n  http://lite-assistant:5000/v1/audio/pitch');
+        const blob = await media("tuner/guitar_a2.wav");
+        const panel = document.createElement("div");
+        panel.innerHTML = '<div class="big">…</div><div class="note"></div>';
+        $("visual").append(panel);
+        const playing = play(blob);
+        const found = await send("/v1/audio/pitch", form([["file", blob], ["instrument", "guitar"]]));
+        panel.querySelector(".big").textContent = found.note || "?";
+        panel.querySelector(".note").textContent = found.advice || "";
+        await playing;
+    },
+
+    async denoise() {
+        scene("POST /v1/audio/denoise", "Taking the noise out of speech",
+              "CMGAN removes background noise from a recording before it's transcribed.",
+              'curl -F file=@noisy.wav \\\n  http://lite-assistant:5000/v1/audio/denoise -o clean.wav');
+        const noisy = await media("audio/noisy.wav");
+        const wave = document.createElement("div");
+        wave.className = "wave";
+        wave.innerHTML = '<div><div class="title">Sent</div><canvas></canvas></div><div><div class="title">Returned</div><canvas></canvas></div>';
+        $("visual").append(wave);
+        const [before, after] = wave.querySelectorAll("canvas");
+        await waveform(noisy, before, "#f87171");
+        const cleaning = send("/v1/audio/denoise", form([["file", noisy]]));
+        await play(noisy);
+        const clean = await cleaning;
+        $("replytext").innerHTML = `<span class="m">audio/wav, ${Math.round(clean.size / 1024)} KB</span>`;
+        await waveform(clean, after, "#4ade80");
+        await play(clean);
+    },
+};
+window.scenes = scenes;
+window.waits = waits;
+window.boardsReady = true;
+</script>
+</body>
+</html>
