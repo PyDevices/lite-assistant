@@ -1,9 +1,33 @@
 name: tests
 
+# The tests run when something they check changed: the package, the tests, the
+# example tool file test_helpers.py loads, the packaging or this workflow. Docs,
+# the showcase, the scripts and the other examples don't run them. A manual run
+# always does.
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'examples/tools/**'
+      - 'pyproject.toml'
+      - '.github/workflows/tests.yml'
   pull_request:
+    # The same list as for push.
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'examples/tools/**'
+      - 'pyproject.toml'
+      - '.github/workflows/tests.yml'
+  workflow_dispatch:
+
+# A newer commit on a pull request replaces the run for the older one. Pushes to
+# main are never cancelled.
+concurrency:
+  group: tests-${{ github.ref }}-${{ github.event_name == 'pull_request' && 'pr' || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   tests:
