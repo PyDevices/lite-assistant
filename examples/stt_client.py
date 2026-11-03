@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Universal STT Client SDK
 Provides a robust, zero-dependency HTTP client for sending audio to the local

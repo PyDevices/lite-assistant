@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Lines to follow: the line finder on drawn floors, UFLD's lanes from a
 fake graph, where the path is, and the /v1/lines endpoint.

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Moonshine STT engine, on ONNX Runtime. Its decoding loop is Useful Sensors'
 from useful-moonshine-onnx (MIT), here so as not to need that package, which

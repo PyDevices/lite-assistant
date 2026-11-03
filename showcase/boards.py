@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The board video: the endpoints a board calls on its own, without the chat,
 each sent a test photo or clip from boards.html, with the request, the

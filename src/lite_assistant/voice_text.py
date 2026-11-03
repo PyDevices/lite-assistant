@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Text handling for the /v1/voice endpoint: splitting a streamed LLM reply into
 sentences for TTS, and cleaning each sentence before it is spoken.

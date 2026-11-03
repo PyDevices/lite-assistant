@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Documents: the text of PDFs, Word files and photos of pages, search_notes
 over them with page numbers and reranking, the Qwen3 reranker's prompt and

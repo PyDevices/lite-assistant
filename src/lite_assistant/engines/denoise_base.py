@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Base interface for noise removal engines, which take the background noise
 out of speech, such as a fan or traffic heard by a cheap microphone.

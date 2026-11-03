@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Setup's choice of chat model: asked once in a terminal, given with --llm,
 kept for next time, and today's default from a script; and the server

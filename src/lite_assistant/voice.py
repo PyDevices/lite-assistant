@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Speaking a reply as it is written, for /v1/voice and the Realtime API: the
 LLM writes sentences on a worker thread while the caller's thread voices

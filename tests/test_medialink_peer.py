@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Tests for examples/medialink_peer.py that need no server: resampling, what
 each mode answers, the paced reply, and, where medialink is importable, a

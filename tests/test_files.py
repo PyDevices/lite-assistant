@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Files: each user's, through OpenAI's Files API, their notes folder for most
 purposes and their media folder for "vision"; and a saved chat's photos,

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The audio endpoints beyond OpenAI's: taking the noise out of speech, who is
 speaking, with voices enrolled by name, the pitch for tuning an instrument,

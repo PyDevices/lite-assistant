@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The image endpoints, editing and quality, and brightening dark photos
 before detection, with fake engines.

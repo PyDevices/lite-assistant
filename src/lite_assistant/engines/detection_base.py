@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Base interfaces and definitions for object detection engines, and the
 letterboxing and non-maximum suppression they share.

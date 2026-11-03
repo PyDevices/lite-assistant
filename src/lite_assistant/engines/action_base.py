@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Base interface for action engines, which recognize what people are doing
 across a video's frames, one frame at a time.

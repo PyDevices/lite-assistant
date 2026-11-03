@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 What the face and pose engines add about people: gestures from joints,
 /v1/detect's describe, pose and hands options, and the describe_people tool,

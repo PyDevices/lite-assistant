@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 identify_plant: the species of the plant in the user's latest photo, from
 an image classification engine that names plants.

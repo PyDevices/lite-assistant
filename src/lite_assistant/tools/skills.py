@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 load_skill: instructions the model loads when a task needs them, as the
 Google AI Edge Gallery's Agent Skills and Claude's skills work. Each skill

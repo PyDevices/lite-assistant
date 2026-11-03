@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The Realtime API (/v1/realtime): a WebSocket session in which the client
 streams microphone audio in and gets the reply back as streamed 24 kHz PCM

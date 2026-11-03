@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 LiteRT-LM chat models: those downloaded to the Hugging Face cache or put in
 the models folder of the data directory, which the LiteRT-LM engine can

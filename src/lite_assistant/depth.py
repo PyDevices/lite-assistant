@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Distances in a depth map, as /v1/depth reports them and the estimate_distance
 tool tells the model: the distance at the center, the nearest and farthest

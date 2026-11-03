@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 PANNs sound engine: CNN14 tagging AudioSet's 527 kinds of sound, on LiteRT.
 """

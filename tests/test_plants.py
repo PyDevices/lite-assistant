@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Naming what a photo shows from a list, such as a plant's species: the
 endpoint and the identify_plant tool, with a fake engine.

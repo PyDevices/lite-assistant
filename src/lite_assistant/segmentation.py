@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Where a segmentation engine found something in a photo: its box, how much
 of the photo it covers and how far away it is, and its mask as an image.

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 What the engines that run .tflite graphs from the Hub share: finding and
 downloading their files, loading a graph, and decoding a photo or audio.

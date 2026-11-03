@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The text of documents: PDFs, Word files and photos of pages, for search_notes
 to search alongside plain notes, and for files attached to a chat message.

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Objects in a photo, as /v1/detect reports them and the estimate_distance tool
 tells the model: what each is, where, and with a depth map, how far.

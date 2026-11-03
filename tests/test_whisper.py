@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Whisper: its log-mel input, finding the language, greedy decoding and
 long audio heard 30 s at a time, with a fake graph.

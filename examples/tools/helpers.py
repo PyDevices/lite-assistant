@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 A tool file of helpers for Gemma, for what small models do badly or can't
 know. Start the server with it to turn them on:

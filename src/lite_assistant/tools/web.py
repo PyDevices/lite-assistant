@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The web tools: search the web, and read a page. Searches go to DuckDuckGo,
 through the ddgs package, or to a SearXNG server if SEARXNG_URL names one.

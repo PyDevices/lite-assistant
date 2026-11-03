@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 # Usage:  python pygmalion.py ~/pygmalion_wav --brackets [split | keep | remove]
 # Save https://www.gutenberg.org/cache/epub/3825/pg3825.txt in the pygmalion.py directory
 import os

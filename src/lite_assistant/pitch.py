@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Tuning: the note a pitch engine hears, how many cents off it is, and for
 an instrument, which string it's nearest and how far off that string.

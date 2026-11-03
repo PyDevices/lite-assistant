@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The image endpoints: editing a photo, as OpenAI's /v1/images/edits does, and
 scoring how good photos are. Also brightening a dark photo before the

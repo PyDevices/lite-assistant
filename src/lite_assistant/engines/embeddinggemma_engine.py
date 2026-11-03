@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 EmbeddingGemma 2 embedding engine, on LiteRT-LM.
 """

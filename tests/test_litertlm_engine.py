@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Unit tests for the LiteRT-LM (Gemma) LLM engine. Loads the model once; skips
 if it hasn't been downloaded (run 'lite-assistant setup' first).

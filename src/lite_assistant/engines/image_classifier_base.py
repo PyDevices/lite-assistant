@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Base interface for image classification engines, which name what a photo
 shows from a fixed list, such as a plant's species.

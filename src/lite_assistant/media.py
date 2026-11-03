@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Images and files in OpenAI content parts. An image_url part may name an
 http(s) URL, which is fetched here, so engines only ever see the image's

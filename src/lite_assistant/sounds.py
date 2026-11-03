@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The sounds in audio, as /v1/audio/classifications reports them and the
 identify_sounds tool tells the model.

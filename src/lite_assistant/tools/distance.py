@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 estimate_distance: how far things in the user's latest photo are from the
 camera, from the depth engine, and with a detection engine, which objects

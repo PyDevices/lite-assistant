@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 What the server's HTTP endpoints share: OpenAI-style errors, and reading the
 photo or audio a request sends to an engine.

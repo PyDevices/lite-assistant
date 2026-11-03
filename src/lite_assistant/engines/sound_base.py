@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Base interfaces and definitions for sound engines, which name the sounds in
 audio, such as a doorbell or a dog barking.

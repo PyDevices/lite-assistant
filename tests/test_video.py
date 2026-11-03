@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Actions across a video's frames: photos sent together or one at a time in
 a session, a video decoded by ffmpeg, and MoViNet's memory with a fake graph.
