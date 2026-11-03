@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Realtime voice chat with lite-assistant from this computer's microphone and
 speakers, through the openai SDK's Realtime client. The server's VAD finds

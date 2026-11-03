@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Voice activity detection for the Realtime API's server turn detection:
 Silero VAD on ONNX Runtime finds where speech starts and stops in a stream

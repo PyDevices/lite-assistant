@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Users and their keys: adding and removing them, and which requests the
 server takes, from this PC, from elsewhere, and behind a proxy.

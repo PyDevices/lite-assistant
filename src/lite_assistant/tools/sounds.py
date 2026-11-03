@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 identify_sounds: the sounds in the user's latest voice clip or recording,
 from the sound engine, such as a doorbell, a dog or an alarm.

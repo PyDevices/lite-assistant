@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 read_text: the text in the user's latest photo, such as a sign, a label or
 a page, from the OCR engine.

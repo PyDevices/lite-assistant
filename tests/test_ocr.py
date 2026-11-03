@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Reading text in photos: the detector's box finding, joining lines into
 text, and the endpoint and read_text tool, with a fake engine.

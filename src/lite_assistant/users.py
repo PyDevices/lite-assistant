@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Who is asking: the users, each with an API key, kept in users.json in the
 data directory. A request from this PC needs no key and comes from the

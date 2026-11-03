@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 edit_photo: edits the user's latest photo, or the last edit of it when they
 ask for more without sending another, with the

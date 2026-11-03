@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Speaker engine on pyannote 3.1's recipe: WeSpeaker embeddings on LiteRT and
 pyannote's segmentation on onnxruntime.

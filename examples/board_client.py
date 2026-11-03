@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Board client for lite-assistant
 A sockets-only client for every kind of request the server takes: GETs, JSON

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Finding things by name: the region and distance of a probability map, the
 /v1/segment endpoint, and estimate_distance finding what the detector

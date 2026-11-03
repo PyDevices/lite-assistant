@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The lite-assistant HTTP server: OpenAI-compatible speech, transcription and
 chat endpoints, a spoken-turn endpoint, and a web page for trying the voices.

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The clock tools: the time, and timers. A timer can't ring, since the server
 can't speak unprompted, so asking about the timers is how to hear one is done.

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The endpoints that aren't chat: what the engines see in a photo and hear in
 audio, and what text is about. None of them are OpenAI endpoints.

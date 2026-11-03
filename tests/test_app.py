@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Tests for the HTTP API with fake engines, so they need no models and run in
 seconds. The OpenAI-compatible endpoints are driven through the official

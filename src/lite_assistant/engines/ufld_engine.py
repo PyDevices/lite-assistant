@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Ultra-Fast-Lane-Detection engine for road lanes, on LiteRT.
 """

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Base interface for image editing engines, which change a photo: brighten it,
 remove its background, erase something, or upscale it.

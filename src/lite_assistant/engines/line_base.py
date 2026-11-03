@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Base interface for line engines, which find lines to follow in a photo
 from a camera looking ahead, such as tape on a floor or a road's lanes.

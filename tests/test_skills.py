@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Skills: reading SKILL.md frontmatter, load_skill's description listing
 the skills and refreshing as they change, and loading one's instructions

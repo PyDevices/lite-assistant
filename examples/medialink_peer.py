@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 medialink peer for lite-assistant
 Joins a medialink link as one more peer, so a board running medialink's

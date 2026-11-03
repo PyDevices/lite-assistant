@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Where lite-assistant keeps files. Models hosted on Hugging Face live in its
 shared cache (huggingface_hub decides where; HF_HOME moves it). Everything

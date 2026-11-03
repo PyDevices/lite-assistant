@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Editing photos: the background removal, erasing and upscaling engines with
 fake graphs, erasing what a prompt names through /v1/images/edits, and the

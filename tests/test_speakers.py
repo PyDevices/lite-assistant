@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Voices: who spoke when, enrolled voices by name, the speaker endpoints and
 noise removal, with fake engines.

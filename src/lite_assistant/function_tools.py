@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Function tools the client defines and runs: their definitions as the chat
 completions API takes them, which is what the LLM engines take, from that

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Built-in tools: plain Python functions the server runs itself when the
 model calls them, unlike function tools, which go back to the client. Each

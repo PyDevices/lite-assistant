@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 What the face and pose engines tell about the people a detection engine
 found: faces' expressions and gaze, and bodies' and hands' joints, with

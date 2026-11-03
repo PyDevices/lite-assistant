@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 search_notes: the user's notes, .txt and .md files in their notes folder, and documents
 there (PDFs, Word files and, with an OCR engine, photos of pages), searched by

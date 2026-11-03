@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 What chat model files don't say, or say wrongly, about the models in them:
 whether a model thinks, whether it calls tools, and the sampling its makers

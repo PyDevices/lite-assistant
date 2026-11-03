@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 tune_instrument: the note in the user's latest recording, and how far out
 of tune it is, from the pitch engine.

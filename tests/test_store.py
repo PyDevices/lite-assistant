@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The conversation store: conversations kept in SQLite outlast a restart,
 are listed by user, the last changed first, and old ones are forgotten,

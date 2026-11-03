@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The lite-assistant command: 'serve' runs the server, 'setup' downloads the
 models, 'models' lists, finds, adds and removes LiteRT-LM chat models, and

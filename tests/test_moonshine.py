@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Moonshine hears only the speech in a clip: a board's recording that starts
 with seconds of room noise, which Moonshine alone turns into nothing, is cut

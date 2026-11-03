@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The video endpoint: what people are doing across a video's frames, from a
 video file or from photos a board sends as it takes them.

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 describe_people: the people in the user's latest photo, from the detection,
 face and pose engines: their faces' expressions and whether they're looking

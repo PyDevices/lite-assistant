@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 A user's files, as OpenAI's Files API gives them. A file of any purpose
 but "vision" goes in the user's notes folder, which search_notes searches,

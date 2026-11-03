@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Who is speaking: the voices a speaker engine finds in audio, when each
 speaks, and which are voices the user has enrolled by name, such as the

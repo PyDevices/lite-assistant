@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Tests for tool folders, and for the example tool file, examples/tools/helpers.py: its tools
 that need no agent, with the web faked, and ask_for_help and helper_answers,

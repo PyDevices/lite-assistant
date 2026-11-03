@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Latency benchmark for a running server: chat completions (time to first token,
 decode speed) and /v1/voice (time to first audio). Talks HTTP only, so it can

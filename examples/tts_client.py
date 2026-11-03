@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Universal TTS Streaming Client
 A zero-dependency socket-based client for interacting with the lite-assistant server.

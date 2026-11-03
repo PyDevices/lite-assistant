@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The Responses API (/v1/responses): turning its input items into the chat
 messages the LLM engines take, and building response objects and the typed

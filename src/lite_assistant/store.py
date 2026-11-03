@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The server's memory of responses and conversations, so a client can
 continue from an earlier reply, or a conversation, by id instead of

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Tests for finding, adding and removing LiteRT-LM models, and the 'lite-assistant
 models' command, with the Hugging Face cache and Hub faked.

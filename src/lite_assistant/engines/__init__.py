@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Engine registry discovery. Dynamically finds and imports every kind of engine
 in this package: TTS, STT, LLM, embedding, depth, detection, sound, text

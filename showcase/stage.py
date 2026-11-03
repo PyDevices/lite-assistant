@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The stage the showcase videos are made on: headless Chromium driving the
 chat page in dark mode at 1080p, with everything the page plays recorded

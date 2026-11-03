@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Tests for examples/board_client.py that need no server: reading replies and
 WebSocket frames from a socket that hands over bytes in uneven pieces.

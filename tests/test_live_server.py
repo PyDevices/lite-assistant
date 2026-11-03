@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Integration tests against a running server with real models
 (LITE_ASSISTANT_URL, default http://localhost:5000), through the official

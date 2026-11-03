@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Base interface for face engines, which tell something about a face that a
 detection engine found, such as its expression or where it's looking.

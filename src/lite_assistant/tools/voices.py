@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 identify_speakers: who is speaking in the user's latest recording, and when,
 naming the voices the user has enrolled, from the speaker engine.

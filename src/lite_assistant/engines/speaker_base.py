@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Base interface for speaker engines, which tell voices apart: an embedding
 of a voice, close to the same voice's and far from others', and when each

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Engines that load on first use and unload when idle, so the server can have
 many models without holding them all in memory.

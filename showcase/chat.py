@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 The chat showcase: one long video of the chat page, and stills, showing
 what it can do, with Gemma 4 E4B answering and the replies spoken.

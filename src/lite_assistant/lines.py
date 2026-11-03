@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Lines to follow, as a board steering a car wants them: where the way
 ahead is, from a line engine's points.

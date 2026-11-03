@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Brad Barnett
+#
+# SPDX-License-Identifier: MIT
+
 """
 Tuning: notes, cents and strings from the pitches heard, CREPE's decoding
 with a fake graph, /v1/audio/pitch and the tune_instrument tool.
