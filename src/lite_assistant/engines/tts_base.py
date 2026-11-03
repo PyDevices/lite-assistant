@@ -11,6 +11,8 @@ class TTSEngine:
     """
     Abstract base class for all TTS engines.
     """
+    # The speeds generate_pcm can make, slowest and fastest
+    SPEEDS = (1.0, 1.0)
     
     def get_available_voices(self) -> List[Dict[str, Any]]:
         """

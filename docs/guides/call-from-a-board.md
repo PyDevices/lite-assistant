@@ -29,6 +29,8 @@ rt.close()
 - **`say()`** plays on `board_peripherals.pcm_out()` by default, or on any `out` with `write()`. It waits for the whole reply before playing, since a weak Wi-Fi link delivers speech unevenly; `prebuffer_ms=1000` starts sooner, and plays smoothly only while the link keeps ahead of the speaker. A board's `pcm_out()` drops what it can't hold, so `say()` writes only what `space()` says fits.
 - **`speech()`** yields the raw 24 kHz PCM as it arrives, for a caller that does its own playing.
 - **`post_files()`** takes a file's data as a list of pieces, such as a WAV header and a recording in memory, so a recording is sent without being copied.
+- **`Client(base_url=..., key=..., models=...)`** points it at a provider instead, over https where the firmware has `ssl`. It doesn't check the certificate unless you pass `cadata`. See [Use this server or a provider](use-any-provider.md).
+- **`detect_objects()`** and **`read_text()`** find things in a photo through chat completions, the same at any server.
 - **`last_ms`** is how long the last request took, from sending to the last byte.
 - **`chat()`** and **`respond()`** return the reply's text and keep the server's JSON in `reply`; **`chat_stream()`**, and `respond(..., stream=True)`, yield the text as the model writes it, with `first_ms` for the first piece.
 - **`voice()`** sends a recording to `/v1/voice` and plays the spoken reply as `say()` does; `voice_stream()` yields it instead. With `stt_model="whisper"` or `"moonshine"`, `heard` is what the server heard; by default the chat model hears the audio itself.

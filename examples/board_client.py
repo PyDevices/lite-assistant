@@ -10,6 +10,10 @@ streamed back as raw PCM, chat (streamed or not), a whole spoken turn, and the
 Realtime API's WebSocket. It runs unchanged on MicroPython (an ESP32-P4 board
 was the first) and on CPython.
 
+Pointed at a provider's base URL it makes the same calls there, as far as the
+provider has them: `Client(base_url="https://api.deepinfra.com/v1/openai",
+key=KEY, models={"chat": "google/gemma-4-26B-A4B-it"})`. See providers.py.
+
 From another machine the server wants a user's key. Make one for the board on
 the server (`lite-assistant users add kitchen-board`) and put it on the board
 in `lite_assistant_key.py`, as `KEY = "..."`. `Client()` imports it from there
@@ -41,6 +45,35 @@ except ImportError:  # CPython
 
 BOUNDARY = "----lite-assistant-board-7f3a9c"
 SPEECH_RATE = 24000  # /v1/audio/speech streams 16-bit mono PCM at 24 kHz
+
+_BOX = {"type": "object", "additionalProperties": False,
+        "required": ["left", "top", "right", "bottom"],
+        "properties": {"left": {"type": "number"}, "top": {"type": "number"},
+                       "right": {"type": "number"}, "bottom": {"type": "number"}}}
+# The two published vision schemas, the same on every provider
+OBJECT_DETECTION = {
+    "name": "object_detection", "strict": True,
+    "schema": {
+        "type": "object", "additionalProperties": False, "required": ["objects"],
+        "properties": {"objects": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False,
+            "required": ["label", "score", "box", "distance"],
+            "properties": {"label": {"type": "string"}, "score": {"type": "number"}, "box": _BOX,
+                           "distance": {"type": ["number", "null"]}}}}}}}
+OCR_EXTRACTION = {
+    "name": "ocr_extraction", "strict": True,
+    "schema": {
+        "type": "object", "additionalProperties": False, "required": ["text", "lines"],
+        "properties": {"text": {"type": "string"}, "lines": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False, "required": ["text", "box"],
+            "properties": {"text": {"type": "string"}, "box": _BOX}}}}}}
+# A chat model needs telling; an engine on the server doesn't read this
+FIND_OBJECTS = ("List the main objects in this photo, ten at most, each one once. Give each box's sides as fractions of the "
+                "photo's width and height, from 0 to 1, score how sure you are from 0 to 1, "
+                "and leave distance null unless you measured it.")
+READ_TEXT = ("Read the text in this photo, line by line, top to bottom. Give each line's box "
+             "as fractions of the photo's width and height, from 0 to 1. In text, give all "
+             "of it with a newline between lines.")
 
 
 class ServerError(Exception):
@@ -98,6 +131,33 @@ def _unquote(text):
         out.append(raw[i])
         i += 1
     return out.decode()
+
+
+def _split_url(url):
+    """(scheme, host, port, path prefix) of a base URL such as
+    ``https://openrouter.ai/api/v1``."""
+    scheme, _, rest = url.partition("://")
+    if scheme not in ("http", "https") or not rest:
+        raise ValueError("a base_url starts with http:// or https://: %r" % url)
+    netloc, slash, path = rest.partition("/")
+    host, colon, port = netloc.partition(":")
+    port = int(port) if colon else 443 if scheme == "https" else 80
+    return scheme, host, port, (slash + path).rstrip("/")
+
+
+def _wrap_tls(sock, host, cadata):
+    """``sock`` over TLS. CPython checks the server's certificate against the
+    system's; a board has no such list, so it checks only with ``cadata``."""
+    try:
+        import ssl
+    except ImportError:
+        raise OSError("https needs a firmware with the ssl module")
+    if hasattr(ssl, "create_default_context"):  # CPython
+        context = ssl.create_default_context(cadata=cadata)
+        return context.wrap_socket(sock, server_hostname=host)
+    if cadata:
+        return ssl.wrap_socket(sock, server_hostname=host, cert_reqs=ssl.CERT_REQUIRED, cadata=cadata)
+    return ssl.wrap_socket(sock, server_hostname=host)
 
 
 def _send(sock, data):
@@ -200,11 +260,21 @@ def _feed(out, queue, space):
 
 
 class Client:
-    """One lite-assistant server. Each request is its own HTTP/1.0 connection,
-    so nothing is held open between them."""
+    """One lite-assistant server, or with ``base_url`` any provider with the
+    same API. Each request is its own HTTP/1.0 connection, so nothing is held
+    open between them. ``models`` gives the model each kind of request uses
+    when it names none: ``chat``, ``speech``, ``voice``, ``transcribe``,
+    ``detect`` and ``read``. ``cadata`` is a CA certificate for a board to
+    check an https server against."""
 
-    def __init__(self, host, port=5000, key=None, timeout=60):
-        if key is None:
+    def __init__(self, host=None, port=5000, key=None, timeout=60, base_url=None, models=None, cadata=None):
+        self.scheme, self._prefix = "http", "/v1"
+        if base_url:
+            # A provider's own key only: never the server's from the file below
+            self.scheme, host, port, self._prefix = _split_url(base_url)
+        elif host is None:
+            raise ValueError("Client needs a host or a base_url")
+        elif key is None:
             try:
                 from lite_assistant_key import KEY as key
             except ImportError:
@@ -212,6 +282,8 @@ class Client:
         self.host = host
         self.port = port
         self.timeout = timeout
+        self.models = models or {}
+        self._cadata = cadata
         self._auth = "Authorization: Bearer %s\r\n" % key if key else ""
         self._addr = None
         self.last_ms = 0  # how long the last request took, sent to last byte
@@ -220,14 +292,18 @@ class Client:
 
     def _open(self, method, path, content_type=None, length=0):
         if self._addr is None:
-            self._addr = socket.getaddrinfo(self.host, self.port)[0][-1]
+            self._addr = socket.getaddrinfo(self.host, self.port, socket.AF_INET)[0][-1]
         sock = socket.socket()
         sock.settimeout(self.timeout)
         try:
             sock.connect(self._addr)
+            if self.scheme == "https":
+                sock = _wrap_tls(sock, self.host, self._cadata)
         except OSError as e:
             sock.close()
-            raise OSError("can't reach lite-assistant at %s:%d: %s" % (self.host, self.port, e))
+            raise OSError("can't reach %s:%d: %s" % (self.host, self.port, e))
+        if path.startswith("/v1/"):
+            path = self._prefix + path[3:]
         head = "%s %s HTTP/1.0\r\nHost: %s\r\n%s" % (method, path, self.host, self._auth)
         if content_type:
             head += "Content-Type: %s\r\nContent-Length: %d\r\n" % (content_type, length)
@@ -344,14 +420,49 @@ class Client:
         or a string for one user message. Returns the reply's text, and keeps
         the server's whole JSON in ``self.reply``. ``opts`` go in the request,
         such as ``max_tokens`` or ``model``."""
-        self.reply = self.post_json("/v1/chat/completions", dict(opts, messages=_messages(messages)))
+        self.reply = self.post_json("/v1/chat/completions", self._chat_request(messages, opts))
         return self.reply["choices"][0]["message"]["content"]
+
+    def _chat_request(self, messages, opts):
+        req = dict(opts, messages=_messages(messages))
+        if "model" not in req and self.models.get("chat"):
+            req["model"] = self.models["chat"]
+        return req
+
+    def detect_objects(self, jpeg, model=None, content_type="image/jpeg"):
+        """The objects in a photo, by the ``object_detection`` schema: a dict
+        with ``objects``, each with its ``label``, ``score``, ``box`` and
+        ``distance``. The ``detect`` model answers, whichever server has it."""
+        return self._vision(OBJECT_DETECTION, FIND_OBJECTS, jpeg, model or self.models.get("detect"), content_type)
+
+    def read_text(self, jpeg, model=None, content_type="image/jpeg"):
+        """The text in a photo, by the ``ocr_extraction`` schema: a dict with
+        ``text``, and ``lines``, each with its ``text`` and ``box``."""
+        return self._vision(OCR_EXTRACTION, READ_TEXT, jpeg, model or self.models.get("read"), content_type)
+
+    def _vision(self, schema, prompt, photo, model, content_type):
+        import binascii
+
+        url = "data:%s;base64,%s" % (content_type, binascii.b2a_base64(photo).strip().decode())
+        # A chat model can go on listing things for as long as it's let
+        req = {"max_tokens": 1024,
+               "messages": [{"role": "user", "content": [{"type": "text", "text": prompt},
+                                                         {"type": "image_url", "image_url": {"url": url}}]}],
+               "response_format": {"type": "json_schema", "json_schema": schema}}
+        if model:
+            req["model"] = model
+        self.reply = self.post_json("/v1/chat/completions", req)
+        choice = self.reply["choices"][0]
+        if choice["finish_reason"] == "length":
+            raise ValueError("%s's reply was cut off before its JSON ended" % self.reply.get("model"))
+        return json.loads(choice["message"]["content"])
 
     def chat_stream(self, messages, **opts):
         """Chat completions, streamed: yields the reply's text a piece at a
         time as the model writes it. ``self.first_ms`` is how long the first
         piece took."""
-        for event in self._events("/v1/chat/completions", dict(opts, messages=_messages(messages), stream=True)):
+        req = dict(self._chat_request(messages, opts), stream=True)
+        for event in self._events("/v1/chat/completions", req):
             for choice in event.get("choices", ()):
                 text = choice.get("delta", {}).get("content")
                 if text:
@@ -413,6 +524,8 @@ class Client:
         yields an empty piece, so the caller can do other work meanwhile."""
         start = ticks_ms()
         req = {"input": text, "response_format": "pcm"}
+        voice = voice or self.models.get("voice")
+        model = model or self.models.get("speech")
         if voice:
             req["voice"] = voice
         if model:
@@ -434,7 +547,8 @@ class Client:
             if status >= 400:
                 raise ServerError(status, reply.read().decode())
             self.headers = headers
-            if poll_ms:
+            # A board's TLS socket has no settimeout, so over https it waits
+            if poll_ms and hasattr(sock, "settimeout"):
                 sock.settimeout(poll_ms / 1000)
             buf = bytearray(chunk)
             view = memoryview(buf)
@@ -587,7 +701,7 @@ class Client:
         uploading it as a WAV; returns the server's JSON, with ``text``."""
         wav = [wav_header(len(pcm), rate), pcm]
         return self.post_files("/v1/audio/transcriptions", [("file", "speech.wav", "audio/wav", wav)],
-                               model=model, language=language)
+                               model=model or self.models.get("transcribe"), language=language)
 
 
 class Realtime:

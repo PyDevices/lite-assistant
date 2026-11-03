@@ -1,5 +1,7 @@
 # Find objects and faces
 
+For the same request at this server or a provider, see [Use this server or a provider](use-any-provider.md#find-objects-and-read-text).
+
 `POST /v1/detect` takes a photo the same ways `/v1/depth` does, and returns the objects YOLOX finds in it, surest first, each with how far it is when a depth engine is loaded:
 
 ```bash

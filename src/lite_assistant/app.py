@@ -14,12 +14,14 @@ import base64
 import collections
 import json
 import queue
+import struct
 import threading
 import time
 import urllib.parse
 import uuid
 from contextlib import asynccontextmanager
 from importlib import resources
+from itertools import chain
 from typing import Any, AsyncIterator, Dict, Iterator, List, Optional, Sequence, Union
 
 import anyio
@@ -38,12 +40,13 @@ from .files import MAX_UPLOAD, Files, from_files
 from .api_common import APIError
 from .function_tools import ToolError, chat_tools
 from .media import MediaError, is_image_part, resolve_files, resolve_image_part, resolve_images
-from .responses import (InputError, ResponseBuilder, ResponseRequest, input_items, new_id, schema_option,
-                        thinking_option, to_messages)
+from .responses import (InputError, ResponseBuilder, ResponseRequest, input_items, new_id,
+                        reasoning_effort, schema_option, thinking_option, to_messages)
 from .store import MAX_ITEMS_PER_ADD, Conversation, Store, StoredResponse, page
 from .tools import Toolbox
 from .users import Auth, Users, admin_only
 from .vad import SileroVAD
+from .vision_tasks import vision_task
 from .voice import spoken_reply
 from .voice_text import VOICE_SYSTEM_PROMPT
 
@@ -81,6 +84,19 @@ class Engines:
             for engine in registry.values():
                 if isinstance(engine, LazyEngine):
                     engine.unload_idle()
+
+    @staticmethod
+    def pick_named(registry: Dict[str, Any], default: str, model: Optional[str]):
+        """
+        The engine for a request's model: the one with that id, the one a
+        provider's model id names, as "openai/whisper-large-v3" names whisper,
+        or else the default engine.
+        """
+        if model in registry:
+            return registry[model]
+        name = (model or "").lower()
+        return next((engine for engine_id, engine in registry.items() if "/" in name and engine_id in name),
+                    registry[default])
 
     def pick_llm(self, model: Optional[str]):
         """
@@ -162,6 +178,9 @@ class SpeechRequest(BaseModel):
     input: str = Field(min_length=1)
     model: Optional[str] = None
     voice: Optional[str] = None
+    # pcm unless asked: OpenAI's default is mp3, which this server doesn't make
+    response_format: Optional[str] = None
+    speed: Optional[float] = None
 
 
 class EmbeddingRequest(BaseModel):
@@ -217,10 +236,25 @@ class ChatRequest(BaseModel):
     # Beyond OpenAI's API: the server's own tools to offer, by name, or false for none
     builtin_tools: Optional[Union[bool, List[str]]] = None
     # Turns the model's thinking on or off (see thinking_option); its thoughts
-    # come back as reasoning_content, as DeepSeek's and vLLM's APIs give them
+    # come back as reasoning_content, as DeepSeek's and vLLM's APIs give them,
+    # and as reasoning, as OpenRouter's does
     reasoning_effort: Optional[str] = None
+    # OpenRouter's and DeepInfra's form of the same: effort, and enabled
+    reasoning: Optional[Dict[str, Any]] = None
     # json_object or json_schema constrains the reply to JSON (see schema_option)
     response_format: Optional[Dict[str, Any]] = None
+
+
+# What /v1/audio/speech can send: raw PCM, or the same in a WAV
+SPEECH_FORMATS = {"pcm": "audio/raw", "wav": "audio/wav"}
+TTS_RATE = 24000
+
+
+def streaming_wav_header(rate: int) -> bytes:
+    """ A 16-bit mono WAV header for samples still to come, so its sizes say as much as a WAV can hold. """
+    return (b"RIFF" + struct.pack("<I", 0xFFFFFFFF) + b"WAVEfmt "
+            + struct.pack("<IHHIIHH", 16, 1, 1, rate, rate * 2, 2, 16)
+            + b"data" + struct.pack("<I", 0xFFFFFFFF - 36))
 
 
 TRANSLATION_PROMPT = ("Translate the speech in this recording into English. Reply with the English "
@@ -512,10 +546,20 @@ def create_app(engines: Optional[Engines] = None, vad=None, builtin_tools: Optio
         if not e.tts:
             raise APIError(500, "No TTS engines loaded.", "server_error")
         # Any model the registry doesn't know, e.g. OpenAI's "tts-1", goes to the default engine
-        engine = e.tts.get(body.model) or e.tts[e.default_tts]
+        engine = e.pick_named(e.tts, e.default_tts, body.model)
         voice = body.voice or engine.get_default_voice()
-        return StreamingResponse(in_threadpool(streamed(engine.generate_pcm(body.input, voice), "Speech")),
-                                 media_type="audio/raw")
+        media_type = SPEECH_FORMATS.get(body.response_format or "pcm")
+        if media_type is None:
+            raise APIError(400, f"response_format {body.response_format!r} isn't one of {', '.join(SPEECH_FORMATS)}.")
+        speed = 1.0 if body.speed is None else body.speed
+        low, high = engine.SPEEDS
+        if not low <= speed <= high:
+            raise APIError(400, f"This voice's speed goes from {low} to {high}.")
+        chunks = engine.generate_pcm(body.input, voice) if speed == 1.0 \
+            else engine.generate_pcm(body.input, voice, speed)
+        if media_type == "audio/wav":
+            chunks = chain([streaming_wav_header(TTS_RATE)], chunks)
+        return StreamingResponse(in_threadpool(streamed(chunks, "Speech")), media_type=media_type)
 
     @app.post("/v1/audio/transcriptions")
     def transcriptions(request: Request, file: UploadFile = File(...), model: Optional[str] = Form(None),
@@ -528,7 +572,7 @@ def create_app(engines: Optional[Engines] = None, vad=None, builtin_tools: Optio
         e = loaded(request)
         if not e.stt:
             raise APIError(500, "No STT engines loaded.", "server_error")
-        engine = e.stt.get(model) or e.stt[e.default_stt]
+        engine = e.pick_named(e.stt, e.default_stt, model)
         speech = file.file.read()
         if str(denoise).lower() in ("true", "1", "yes"):
             from .engines.tflite import wav
@@ -647,18 +691,23 @@ def create_app(engines: Optional[Engines] = None, vad=None, builtin_tools: Optio
     @app.post("/v1/chat/completions")
     def chat_completions(body: ChatRequest, request: Request):
         e = loaded(request)
-        if not e.llm:
+        try:
+            task = vision_task(e, body.model, body.response_format)
+        except InputError as exc:
+            raise APIError(400, str(exc))
+        if not task and not e.llm:
             raise APIError(500, "No chat model is loaded; this server runs with --llm none.", "server_error")
-        engine = e.pick_llm(body.model)
+        engine = task or e.pick_llm(body.model)
 
         try:
             messages = resolve_files(resolve_images(body.messages), next(iter(e.ocr.values()), None))
             tools = chat_tools(body.tools, body.tool_choice)
-            thinking = thinking_option(body.reasoning_effort)
+            thinking = thinking_option(reasoning_effort(body.reasoning_effort, body.reasoning))
             schema = schema_option(body.response_format)
             # Built-in tools run here; the client sees only the reply they lead to
-            engine = request.app.state.toolbox.llm(engine, request.app.state.toolbox.select(body.builtin_tools),
-                                                   user=request.user)
+            if not task:
+                engine = request.app.state.toolbox.llm(engine, request.app.state.toolbox.select(body.builtin_tools),
+                                                       user=request.user)
         except (InputError, MediaError, ToolError) as exc:
             raise APIError(400, str(exc))
         max_tokens = body.max_completion_tokens if body.max_completion_tokens is not None else body.max_tokens
@@ -718,7 +767,7 @@ def create_app(engines: Optional[Engines] = None, vad=None, builtin_tools: Optio
             reason, usage_body = finish()
             message = {"role": "assistant", "content": text if text or not calls else None}
             if thoughts:
-                message["reasoning_content"] = "".join(thoughts)
+                message["reasoning_content"] = message["reasoning"] = "".join(thoughts)
             if calls:
                 message["tool_calls"] = [tool_call(call) for call in calls]
             return {
@@ -745,7 +794,8 @@ def create_app(engines: Optional[Engines] = None, vad=None, builtin_tools: Optio
                                   "finish_reason": None}])
                 elif isinstance(chunk, Thought):
                     thoughts.append(chunk.text)
-                    yield event([{"index": 0, "delta": {"reasoning_content": chunk.text}, "finish_reason": None}])
+                    yield event([{"index": 0, "delta": {"reasoning_content": chunk.text, "reasoning": chunk.text},
+                                  "finish_reason": None}])
                 else:
                     yield delta(chunk)
             reason, usage_body = finish()
