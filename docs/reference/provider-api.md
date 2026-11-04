@@ -19,7 +19,7 @@ The calls a client can make against this server, DeepInfra or OpenRouter, and ho
 | `POST /responses` | Yes | Yes | Yes |
 | `input_audio` parts in chat | Yes | No | With a model that hears |
 
-A request's other fields follow OpenAI's API at all three. Thoughts come back as `reasoning` and `reasoning_content` here, so read whichever your provider sends.
+A request's other fields follow OpenAI's API at all three. Thoughts come back as `reasoning_content` at DeepInfra and `reasoning` at OpenRouter, and under both names here, so read either.
 
 These work only on this server: `/v1/voice`, `/v1/realtime`, `/v1/detect`, `/v1/depth`, `/v1/segment`, `/v1/lines`, `/v1/ocr`, `/v1/classify`, and the [other endpoints](endpoints.md) marked as not OpenAI's.
 
