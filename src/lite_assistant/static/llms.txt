@@ -12,7 +12,7 @@
 
 ## Speaking and listening
 
-- `POST /v1/audio/speech`: text to speech. JSON `{"model": "kokoro", "voice": "<id>", "input": "<text>"}`. The reply streams as raw 16-bit 24 kHz mono PCM, whatever `response_format` asks for.
+- `POST /v1/audio/speech`: text to speech. JSON `{"model": "kokoro", "voice": "<id>", "input": "<text>"}`. The reply streams as raw 16-bit 24 kHz mono PCM, or as a WAV with `"response_format": "wav"`; any other format is a 400. `speed` is honoured.
 - `GET /voices`: the voices, each with its `id`, `name` and `engine`.
 - `POST /v1/audio/transcriptions`: speech to text, multipart with `file` (a WAV). `model=whisper` is slower and more accurate than the default, Moonshine, and hears about 100 languages.
 - `POST /v1/voice`: a whole spoken turn. Audio in, the spoken reply out as 24 kHz PCM. Needs the chat model.
@@ -22,6 +22,8 @@
 
 - `POST /v1/chat/completions` and `POST /v1/responses`: OpenAI's chat APIs, streamed or not, with images, audio, files and function tools.
 - With `--llm none`, no chat model is loaded and these answer with an error that says so. Speech, transcription and everything else still work.
+- Same request, any server: a chat completion with a photo and the `object_detection` or `ocr_extraction` schema. `model` `yolox`, `yunet` or `ppocr` makes the engine answer, even with `--llm none`; a vision model writes the same JSON here or at a provider. See docs/reference/provider-api.md.
+- `reasoning: {"effort": ..., "enabled": ...}` works as well as `reasoning_effort`; thoughts come back as `reasoning` and `reasoning_content`.
 
 ## Seeing and hearing more
 

@@ -75,6 +75,19 @@ def thinking_option(effort: Optional[str]) -> Dict[str, Any]:
     return {"thinking": EFFORT_BUDGETS[effort] or True}
 
 
+def reasoning_effort(effort: Optional[str], reasoning: Optional[Dict[str, Any]]) -> Optional[str]:
+    """
+    The effort a chat completion asks for: its reasoning_effort, or else its
+    reasoning object's effort or enabled, OpenRouter's and DeepInfra's form.
+    """
+    reasoning = reasoning or {}
+    if effort is not None or reasoning.get("effort") is not None:
+        return effort if effort is not None else reasoning["effort"]
+    if "enabled" not in reasoning:
+        return None
+    return "high" if reasoning["enabled"] else "none"
+
+
 def schema_option(format: Optional[Dict[str, Any]], flat: bool = False) -> Dict[str, Any]:
     """
     The engine's response_schema option for a response format, as keyword

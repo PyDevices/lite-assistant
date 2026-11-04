@@ -1,5 +1,7 @@
 # Read text in photos
 
+For the same request at this server or a provider, see [Use this server or a provider](use-any-provider.md#find-objects-and-read-text).
+
 `POST /v1/ocr` reads the text in a photo, taken as `/v1/detect` takes one, with PP-OCRv6. `text` is all of it, with words side by side in a row joined by spaces and rows by newlines; `lines` has each line the detector found, with how sure the reader is (`score`, 0 to 1) and its `box` as fractions of the photo (left, top, right, bottom):
 
 ```bash

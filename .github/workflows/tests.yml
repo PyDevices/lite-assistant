@@ -11,6 +11,9 @@ on:
       - 'src/**'
       - 'tests/**'
       - 'examples/tools/**'
+      - 'examples/board_client.py'
+      - 'examples/providers.py'
+      - 'scripts/check_provider.py'
       - 'pyproject.toml'
       - '.github/workflows/tests.yml'
   pull_request:
@@ -19,6 +22,9 @@ on:
       - 'src/**'
       - 'tests/**'
       - 'examples/tools/**'
+      - 'examples/board_client.py'
+      - 'examples/providers.py'
+      - 'scripts/check_provider.py'
       - 'pyproject.toml'
       - '.github/workflows/tests.yml'
   workflow_dispatch:
@@ -42,5 +48,5 @@ jobs:
       # These files use fake engines and need no models. The engine tests load
       # real models, so they run on a machine that has them.
       - run: >
-          pytest -q tests/test_app.py tests/test_users.py tests/test_files.py
+          pytest -q tests/test_app.py tests/test_provider_api.py tests/test_users.py tests/test_files.py
           tests/test_litert_models.py tests/test_helpers.py tests/test_web.py

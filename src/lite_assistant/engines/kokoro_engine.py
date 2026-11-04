@@ -33,6 +33,8 @@ class KokoroEngine(TTSEngine):
     Kokoro TTS Engine Implementation.
     High-quality, on-device AI voice. Yields float32 which is downsampled to 16-bit PCM.
     """
+    SPEEDS = (0.25, 4.0)
+
     def __init__(self, models_dir=None):
         self.models_dir = models_dir or data_dir("kokoro")
         self.kokoro = None
@@ -74,7 +76,7 @@ class KokoroEngine(TTSEngine):
     def get_default_voice(self) -> str:
         return self.default_voice
 
-    def generate_pcm(self, text: str, voice: str) -> Iterator[bytes]:
+    def generate_pcm(self, text: str, voice: str, speed: float = 1.0) -> Iterator[bytes]:
         if not self.kokoro:
             yield b""
             return
@@ -82,7 +84,7 @@ class KokoroEngine(TTSEngine):
         import audioop
         # Kokoro generates audio natively at 24kHz float32
         # Without its language, a voice's text is phonemized as English
-        audio, sample_rate = self.kokoro.create(text, voice=voice, speed=1.0, lang=voice_language(voice))
+        audio, sample_rate = self.kokoro.create(text, voice=voice, speed=speed, lang=voice_language(voice))
         
         # Convert float32 [-1.0, 1.0] to int16
         audio_int16 = (audio * 32767).astype(np.int16).tobytes()
