@@ -2,14 +2,12 @@
 
 ## Boards as peers
 
-Boards will talk to each other directly, audio and video, half duplex, over a
-PyDevices package whose working name is `medialink`. The server then joins as one more
-peer that speaks the same protocol. The server joins today through
-`examples/medialink_peer.py`, which answers each turn by echo, by saying back
+Boards talk to each other directly, audio and video, over pydevices'
+`medialink`, and the server joins as one more peer through
+`examples/medialink_peer.py`. It answers each turn by echo, by saying back
 what Moonshine heard, or through /v1/voice when the chat model is loaded.
 
-Examples to build once the server is a peer, each using engines the server
-already has:
+Examples to build on that, each using engines the server already has:
 
 ### Robot car
 
