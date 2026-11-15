@@ -11,12 +11,8 @@ Examples to build on that, each using engines the server already has:
 
 ### Robot car
 
-- **Talk to drive it.** Push-to-talk from a phone or a board; Moonshine
-  transcribes and the fast classifier turns "left", "faster", "stop" into a
-  command in milliseconds, without the LLM.
 - **Stop for what's in the way.** The car streams its camera; detection and
   depth say what's ahead and how far, and the car stops and says why.
-- **Follow a line,** from `/v1/lines` on the streamed frames.
 - **Follow me,** from pose or face tracking, and stop when a hand is raised.
 - **Telepresence.** The videophone on wheels: you see and hear from the car
   and talk through it.
@@ -25,8 +21,6 @@ Examples to build on that, each using engines the server already has:
 
 ### Robot
 
-- **Find a thing by name.** "Find the red cup": segmentation by name plus
-  depth gives where it is and how far.
 - **Narrate what it sees,** on request, from the LLM looking at a frame.
 - **Gestures as commands:** a raised hand stops it; a wave starts it, from
   the action model.
@@ -41,6 +35,5 @@ Examples to build on that, each using engines the server already has:
   and speaker recognition, and the desktop board says who it is.
 - **Baby monitor alerts.** The sound classifier hears crying on the monitor's
   stream and the desktop board says so.
-- **Read it to me.** Hold a page up to the camera; OCR reads it aloud.
 - **Knows who's asking,** from speaker recognition, so replies and notes are
   per person.
