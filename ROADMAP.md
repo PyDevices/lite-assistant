@@ -2,7 +2,7 @@
 
 ## Boards as peers
 
-Boards talk to each other directly, audio and video, over pydevices'
+Boards talk to each other directly, audio and video, over OmniPython's
 `medialink`, and the server joins as one more peer through
 `examples/medialink_peer.py`. It answers each turn by echo, by saying back
 what Moonshine heard, or through /v1/voice when the chat model is loaded.
